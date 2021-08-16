@@ -13,7 +13,7 @@ const server=express();
 
 server.use(cors());
 
-const PORT=3001;
+const PORT=process.env.PORT;
 
 // http://localhost:3001/weatherdata?city_name=Seattle
 // console.log('helloooo');
