@@ -4,10 +4,12 @@ const express=require('express');
 
 const cors = require('cors');
 
+let axios=require('axios');
+
 require('dotenv').config();
 
 
-let weather =require('./data/weather.json');
+// let weather =require('./data/weather.json');
 
 const server=express();
 
@@ -28,22 +30,20 @@ server.get('/',(req,res)=>{
 
 
 
-server.get('/weatherdata',(req,res)=>{
-  let city =req.query.city_name;
-  //   let low =req.query.low_temp;
-  //   let high=req.query.max_temp;
-  // let description1=req.query.description;
-  // let date=req.query.valid_date;
+server.get('/weatherdata',async (req,res)=>{
   try{
-    console.log(city);
-    let element=weather.find(item=>
-      (item.city_name.toLowerCase() == req.query.city_name.toLowerCase())
-    );
-    let WeatherData = element.data.map(item => {
+  let city =req.query.city_name;
+  let request =await axios.get(`https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&key=${process.env.WEATHER_KEY}`);
+  let liveWeatherData=request.data;
+  let counter=0;
+    
+    let WeatherData = liveWeatherData.data.map(item => {
       let forecastDay = new Forecast(item.datetime, `Low of ${item.low_temp} , High of ${item.max_temp} with  ${item.weather.description}`);
+      counter=counter+1;
       return forecastDay;
     });
-    res.send(WeatherData);
+    let sliced=WeatherData.slice(0,6);
+    res.send(sliced);
   }
   catch(error){
     res.send('error');
