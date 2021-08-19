@@ -1,22 +1,37 @@
 let axios=require('axios');
 require('dotenv').config();
 
+let CacheMemory={};
+
 let AllMovies=async function (req,res){
+  let AllMoviesSearch=req.query.movieSearch;
+  if(CacheMemory[AllMoviesSearch]!==undefined){
+    res.send(CacheMemory[AllMoviesSearch]);
+    console.log('Element is in cache memory, its already saved!');
+    // console.log(CacheMemory);
+  }
+  else{
+    
     try{
-      let movieSearch=req.query.movieSearch
-      let movieData=await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_KEY}&query=${movieSearch}`)
+      let movieData=await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_KEY}&query=${AllMoviesSearch}`)
+      console.log('Element is not in cache memory, Dont woryy it will be Added right Now!');
       
       let MoviesList=movieData.data.results
       let CityMovies=MoviesList.map(Movies=>{
         let AddMovieList = new MovieList(Movies.original_title,`Overview :${Movies.overview}`,`Average Votes :${Movies.vote_average}`,`Total Votes :${Movies.vote_count}`,Movies.poster_path,`Popularity :${Movies.popularity}`,`Release Date :${Movies.release_date}`)
         return AddMovieList
       })
+      // console.log(CacheMemory);
+
+      CacheMemory[AllMoviesSearch]=CityMovies;
       res.send(CityMovies);
     }
     catch(error){
       console.log(error);
       res.send('ERROR')
     }
+  }
+
   
   }
   
